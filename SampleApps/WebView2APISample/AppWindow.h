@@ -17,7 +17,7 @@
 #include <vector>
 #include <winnt.h>
 #include <winrt/Windows.UI.Composition.h>
-#include <winrt/Windows.UI.ViewManagement.h>
+// #include <winrt/Windows.UI.ViewManagement.h>
 
 namespace winrtComp = winrt::Windows::UI::Composition;
 
@@ -51,7 +51,7 @@ public:
     std::wstring GetLocalUri(std::wstring path);
     std::function<void()> GetAcceleratorKeyFunction(UINT key);
     double GetDpiScale();
-    double GetTextScale();
+    // double GetTextScale();
 
     void ReinitializeWebView();
 
@@ -89,9 +89,9 @@ private:
     void ChangeLanguage();
     void UpdateCreationModeMenu();
     void ToggleAADSSO();
-    void OnTextScaleChanged(
-        winrt::Windows::UI::ViewManagement::UISettings const& uiSettings,
-        winrt::Windows::Foundation::IInspectable const& args);
+    // void OnTextScaleChanged(
+    //     winrt::Windows::UI::ViewManagement::UISettings const& uiSettings,
+    //     winrt::Windows::Foundation::IInspectable const& args);
     std::wstring GetLocalPath(std::wstring path, bool keep_exe_path);
     void DeleteAllComponents();
 
@@ -133,7 +133,7 @@ private:
 
     wil::com_ptr<IDCompositionDevice> m_dcompDevice;
     winrtComp::Compositor m_wincompCompositor{ nullptr };
-    winrt::Windows::UI::ViewManagement::UISettings m_uiSettings{ nullptr };
+    // winrt::Windows::UI::ViewManagement::UISettings m_uiSettings{ nullptr };
 };
 
 template <class ComponentType, class... Args> void AppWindow::NewComponent(Args&&... args)

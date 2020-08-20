@@ -137,7 +137,8 @@ void Toolbar::UpdateFont()
     LOGFONT logFont;
     GetObject(GetStockObject(SYSTEM_FONT), sizeof(LOGFONT), &logFont);
     double dpiScale = m_appWindow->GetDpiScale();
-    double textScale = m_appWindow->GetTextScale();
+    double textScale = m_appWindow->GetDpiScale();
+    // double textScale = m_appWindow->GetTextScale();
     logFont.lfHeight *= dpiScale * textScale;
     logFont.lfWidth *= dpiScale * textScale;
     StringCchCopy(logFont.lfFaceName, ARRAYSIZE(logFont.lfFaceName), s_fontName);
