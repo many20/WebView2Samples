@@ -21,11 +21,11 @@ static D2D1_MATRIX_4X4_F Convert3x2MatrixTo4x4Matrix(D2D1_MATRIX_3X2_F* matrix3x
 ViewComponent::ViewComponent(
     AppWindow* appWindow,
     IDCompositionDevice* dcompDevice,
-    winrtComp::Compositor wincompCompositor,
+    // winrtComp::Compositor wincompCompositor,
     bool isDcompTargetMode)
     : m_appWindow(appWindow), m_controller(appWindow->GetWebViewController()),
       m_webView(appWindow->GetWebView()), m_dcompDevice(dcompDevice),
-      m_wincompCompositor(wincompCompositor), m_isDcompTargetMode(isDcompTargetMode)
+      m_isDcompTargetMode(isDcompTargetMode)
 {
     //! [ZoomFactorChanged]
     // Register a handler for the ZoomFactorChanged event.
@@ -72,11 +72,11 @@ ViewComponent::ViewComponent(
             CHECK_FAILURE(m_dcompDevice->Commit());
             //! [SetRootVisualTarget]
         }
-        else if (m_wincompCompositor)
-        {
-            BuildWinCompVisualTree();
-            CHECK_FAILURE(m_compositionController->put_RootVisualTarget(m_wincompWebViewVisual.as<IUnknown>().get()));
-        }
+        // else if (m_wincompCompositor)
+        // {
+        //     BuildWinCompVisualTree();
+        //     CHECK_FAILURE(m_compositionController->put_RootVisualTarget(m_wincompWebViewVisual.as<IUnknown>().get()));
+        // }
         else
         {
             FAIL_FAST();
@@ -101,7 +101,7 @@ ViewComponent::ViewComponent(
             &m_cursorChangedToken));
         //! [CursorChanged]
     }
-    else if (m_dcompDevice || m_wincompCompositor)
+    else if (m_dcompDevice)
     {
         FAIL_FAST();
     }
@@ -278,22 +278,6 @@ void ViewComponent::ResizeWebView()
                 {0, 0, float(webViewSize.cx), float(webViewSize.cy)}));
             CHECK_FAILURE(m_dcompDevice->Commit());
         }
-        else if (m_wincompCompositor)
-        {
-            if (m_wincompRootVisual != nullptr)
-            {
-                numerics::float2 size = {static_cast<float>(webViewSize.cx),
-                                         static_cast<float>(webViewSize.cy)};
-                m_wincompRootVisual.Size(size);
-
-                numerics::float3 offset = {static_cast<float>(webViewOffset.x),
-                                           static_cast<float>(webViewOffset.y), 0.0f};
-                m_wincompRootVisual.Offset(offset);
-
-                winrtComp::IInsetClip insetClip = m_wincompCompositor.CreateInsetClip();
-                m_wincompRootVisual.Clip(insetClip.as<winrtComp::CompositionClip>());
-            }
-        }
     }
 }
 //! [ResizeWebView]
@@ -357,20 +341,12 @@ void ViewComponent::SetTransform(TransformType transformType)
         m_webViewTransformMatrix = D2D1::Matrix4x4F();
     }
 
-    if (m_dcompDevice && !m_wincompCompositor)
+    if (m_dcompDevice)
     {
         wil::com_ptr<IDCompositionVisual3> dcompWebViewVisual3;
         m_dcompWebViewVisual->QueryInterface(IID_PPV_ARGS(&dcompWebViewVisual3));
         CHECK_FAILURE(dcompWebViewVisual3->SetTransform(m_webViewTransformMatrix));
         CHECK_FAILURE(m_dcompDevice->Commit());
-    }
-    else if (m_wincompCompositor && !m_dcompDevice)
-    {
-        if (m_wincompWebViewVisual != nullptr)
-        {
-            m_wincompWebViewVisual.TransformMatrix(
-                *reinterpret_cast<numerics::float4x4*>(&m_webViewTransformMatrix));
-        }
     }
     else
     {
@@ -394,7 +370,7 @@ static D2D1_MATRIX_4X4_F Convert3x2MatrixTo4x4Matrix(D2D1_MATRIX_3X2_F* matrix3x
 bool ViewComponent::OnMouseMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
     // Manually relay mouse messages to the WebView
-    if (m_dcompDevice || m_wincompCompositor)
+    if (m_dcompDevice)
     {
         POINT point;
         POINTSTOPOINT(point, lParam);
@@ -495,7 +471,7 @@ bool ViewComponent::OnMouseMessage(UINT message, WPARAM wParam, LPARAM lParam)
 bool ViewComponent::OnPointerMessage(UINT message, WPARAM wParam, LPARAM lParam)
 {
     bool handled = false;
-    if (m_dcompDevice || m_wincompCompositor)
+    if (m_dcompDevice)
     {
         POINT point;
         POINTSTOPOINT(point, lParam);
@@ -589,39 +565,39 @@ void ViewComponent::DestroyDCompVisualTree()
     }
 }
 
-void ViewComponent::BuildWinCompVisualTree()
-{
-    namespace abiComp = ABI::Windows::UI::Composition;
+// void ViewComponent::BuildWinCompVisualTree()
+// {
+//     namespace abiComp = ABI::Windows::UI::Composition;
 
-    if (m_wincompWebViewVisual == nullptr)
-    {
-        auto interop = m_wincompCompositor.as<abiComp::Desktop::ICompositorDesktopInterop>();
-        winrt::check_hresult(interop->CreateDesktopWindowTarget(
-            m_appWindow->GetMainWindow(), false,
-            reinterpret_cast<abiComp::Desktop::IDesktopWindowTarget**>(winrt::put_abi(m_wincompHwndTarget))));
+//     if (m_wincompWebViewVisual == nullptr)
+//     {
+//         auto interop = m_wincompCompositor.as<abiComp::Desktop::ICompositorDesktopInterop>();
+//         winrt::check_hresult(interop->CreateDesktopWindowTarget(
+//             m_appWindow->GetMainWindow(), false,
+//             reinterpret_cast<abiComp::Desktop::IDesktopWindowTarget**>(winrt::put_abi(m_wincompHwndTarget))));
 
-        m_wincompRootVisual = m_wincompCompositor.CreateContainerVisual();
-        m_wincompHwndTarget.Root(m_wincompRootVisual);
+//         m_wincompRootVisual = m_wincompCompositor.CreateContainerVisual();
+//         m_wincompHwndTarget.Root(m_wincompRootVisual);
 
-        m_wincompWebViewVisual = m_wincompCompositor.CreateContainerVisual();
-        m_wincompRootVisual.Children().InsertAtTop(m_wincompWebViewVisual);
-    }
-}
+//         m_wincompWebViewVisual = m_wincompCompositor.CreateContainerVisual();
+//         m_wincompRootVisual.Children().InsertAtTop(m_wincompWebViewVisual);
+//     }
+// }
 
-void ViewComponent::DestroyWinCompVisualTree()
-{
-    if (m_wincompWebViewVisual != nullptr)
-    {
-        m_wincompWebViewVisual.Children().RemoveAll();
-        m_wincompWebViewVisual = nullptr;
+// void ViewComponent::DestroyWinCompVisualTree()
+// {
+//     if (m_wincompWebViewVisual != nullptr)
+//     {
+//         m_wincompWebViewVisual.Children().RemoveAll();
+//         m_wincompWebViewVisual = nullptr;
 
-        m_wincompRootVisual.Children().RemoveAll();
-        m_wincompRootVisual = nullptr;
+//         m_wincompRootVisual.Children().RemoveAll();
+//         m_wincompRootVisual = nullptr;
 
-        m_wincompHwndTarget.Root(nullptr);
-        m_wincompHwndTarget = nullptr;
-    }
-}
+//         m_wincompHwndTarget.Root(nullptr);
+//         m_wincompHwndTarget = nullptr;
+//     }
+// }
 
 ViewComponent::~ViewComponent()
 {
@@ -634,6 +610,6 @@ ViewComponent::~ViewComponent()
         // is destroyed. If the webview is closed explicitly, this will succeed.
         m_compositionController->put_RootVisualTarget(nullptr);
         DestroyDCompVisualTree();
-        DestroyWinCompVisualTree();
+        // DestroyWinCompVisualTree();
     }
 }

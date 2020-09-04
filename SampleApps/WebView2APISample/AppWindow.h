@@ -16,10 +16,10 @@
 #include <string>
 #include <vector>
 #include <winnt.h>
-#include <winrt/Windows.UI.Composition.h>
+// #include <winrt/Windows.UI.Composition.h>
 // #include <winrt/Windows.UI.ViewManagement.h>
 
-namespace winrtComp = winrt::Windows::UI::Composition;
+// namespace winrtComp = winrt::Windows::UI::Composition;
 
 class SettingsComponent;
 
@@ -132,7 +132,7 @@ private:
     HRESULT TryCreateDispatcherQueue();
 
     wil::com_ptr<IDCompositionDevice> m_dcompDevice;
-    winrtComp::Compositor m_wincompCompositor{ nullptr };
+    // winrtComp::Compositor m_wincompCompositor{ nullptr };
     // winrt::Windows::UI::ViewManagement::UISettings m_uiSettings{ nullptr };
 };
 

@@ -452,7 +452,7 @@ void AppWindow::InitializeWebView()
     // getting created which will apply the browser switches.
     CloseWebView();
     m_dcompDevice = nullptr;
-    m_wincompCompositor = nullptr;
+    // m_wincompCompositor = nullptr;
     LPCWSTR subFolder = nullptr;
 
     if (m_creationModeId == IDM_CREATION_MODE_VISUAL_DCOMP ||
@@ -483,7 +483,7 @@ void AppWindow::InitializeWebView()
                 L"Create with Windowless WinComp Visual Failed", MB_OK);
             return;
         }
-        m_wincompCompositor = winrtComp::Compositor();
+        // m_wincompCompositor = winrtComp::Compositor();
     }
     //! [CreateCoreWebView2EnvironmentWithOptions]
     auto options = Microsoft::WRL::Make<CoreWebView2EnvironmentOptions>();
@@ -524,7 +524,7 @@ HRESULT AppWindow::OnCreateEnvironmentCompleted(
 
     auto webViewExperimentalEnvironment =
         m_webViewEnvironment.try_query<ICoreWebView2ExperimentalEnvironment>();
-    if (webViewExperimentalEnvironment && (m_dcompDevice || m_wincompCompositor))
+    if (webViewExperimentalEnvironment && (m_dcompDevice/* || m_wincompCompositor*/))
     {
         CHECK_FAILURE(webViewExperimentalEnvironment->CreateCoreWebView2CompositionController(
             m_mainWindow,
@@ -574,7 +574,8 @@ HRESULT AppWindow::OnCreateCoreWebView2ControllerCompleted(HRESULT result, ICore
             this, m_webViewEnvironment.get(), m_oldSettingsComponent.get());
         m_oldSettingsComponent = nullptr;
         NewComponent<ViewComponent>(
-            this, m_dcompDevice.get(), m_wincompCompositor,
+            // this, m_dcompDevice.get(), m_wincompCompositor,
+            this, m_dcompDevice.get(),
             m_creationModeId == IDM_CREATION_MODE_TARGET_DCOMP);
         NewComponent<ControlComponent>(this, &m_toolbar);
 
