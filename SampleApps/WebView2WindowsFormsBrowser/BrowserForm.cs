@@ -2,6 +2,8 @@
 // Use of this source code is governed by a BSD-style license that can be
 // found in the LICENSE file.
 
+//https://docs.microsoft.com/en-us/microsoft-edge/webview2/gettingstarted/winforms
+
 using System;
 using System.Windows.Forms;
 using Microsoft.Web.WebView2.Core;
@@ -14,6 +16,13 @@ namespace WebView2WindowsFormsBrowser
         {
             InitializeComponent();
             HandleResize();
+
+            this.FormBorderStyle = System.Windows.Forms.FormBorderStyle.None;
+
+            this.Size = new System.Drawing.Size(1024, 768);
+            this.Location = new System.Drawing.Point(0, 0);
+
+            this.webView2Control.Source = new System.Uri("https://sandbox.prestige.de/displayengine.h5/testsapp/", System.UriKind.Absolute);
         }
 
         private void UpdateTitleWithEvent(string message)
@@ -35,7 +44,7 @@ namespace WebView2WindowsFormsBrowser
 
         private void WebView2Control_SourceChanged(object sender, CoreWebView2SourceChangedEventArgs e)
         {
-            txtUrl.Text = webView2Control.Source.AbsoluteUri;
+            //txtUrl.Text = webView2Control.Source.AbsoluteUri;
         }
 
         private void WebView2Control_CoreWebView2Ready(object sender, EventArgs e)
@@ -61,14 +70,14 @@ namespace WebView2WindowsFormsBrowser
         {
             // No explicit check for webView2Control initialization because the events can only start
             // firing after the CoreWebView2 and its events exist for us to subscribe.
-            btnBack.Enabled = webView2Control.CoreWebView2.CanGoBack;
-            btnForward.Enabled = webView2Control.CoreWebView2.CanGoForward;
+            //btnBack.Enabled = webView2Control.CoreWebView2.CanGoBack;
+            //btnForward.Enabled = webView2Control.CoreWebView2.CanGoForward;
             UpdateTitleWithEvent("HistoryChanged");
         }
 
         private void CoreWebView2_SourceChanged(object sender, CoreWebView2SourceChangedEventArgs e)
         {
-            this.txtUrl.Text = this.webView2Control.Source.AbsoluteUri;
+            //this.txtUrl.Text = this.webView2Control.Source.AbsoluteUri;
             UpdateTitleWithEvent("SourceChanged");
         }
 
@@ -87,7 +96,7 @@ namespace WebView2WindowsFormsBrowser
 
         private void BtnGo_Click(object sender, EventArgs e)
         {
-            webView2Control.Source = new Uri(txtUrl.Text);
+            //webView2Control.Source = new Uri(txtUrl.Text);
         }
 
         private void btnBack_Click(object sender, EventArgs e)
@@ -138,11 +147,29 @@ namespace WebView2WindowsFormsBrowser
 
             // Move the Events button
             btnEvents.Left = this.ClientSize.Width - btnEvents.Width;
-            // Move the Go button
-            btnGo.Left = this.btnEvents.Left - btnGo.Size.Width;
+            //// Move the Go button
+            //btnGo.Left = this.btnEvents.Left - btnGo.Size.Width;
 
-            // Resize the URL textbox
-            txtUrl.Width = btnGo.Left - txtUrl.Left;
+            //// Resize the URL textbox
+            //txtUrl.Width = btnGo.Left - txtUrl.Left;
+        }
+
+        private void BrowserForm_KeyDown(object sender, KeyEventArgs e)
+        {
+            if (e.KeyCode == Keys.F5)
+            {
+                webView2Control.Reload();
+            }
+
+            if (e.KeyCode == Keys.PageDown)
+            {
+                (new EventMonitor(this.webView2Control)).Show(this);
+            }
+
+            if (e.KeyCode == Keys.F2)
+            {
+                this.Close();
+            }
         }
     }
 }
